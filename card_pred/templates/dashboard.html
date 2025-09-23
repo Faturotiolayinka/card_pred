@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediction Dashboard</title>
+    <style>
+        body{background:#f0f2f5;margin:0;font-family:Arial,sans-serif;}
+        main.dashboard-container{max-width:600px;margin:3rem auto;background:rgba(255,255,255,0.95);border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.12);padding:2rem 2.5rem;text-align:center;}
+        .result{font-size:1.5rem;font-weight:bold;margin-bottom:1.5rem;padding:1rem;border-radius:8px;display:inline-block;}
+        .fraud{background:#ffdddd;color:#b30000;border:1px solid #b30000;}
+        .not-fraud{background:#ddffdd;color:#006600;border:1px solid #006600;}
+        .explanation{margin-top:1.5rem;text-align:left;background:#f8f8f8;padding:1rem;border-radius:8px;}
+        .back-link{display:inline-block;margin-top:2rem;color:#007bff;text-decoration:none;font-weight:bold;}
+        @media (max-width:700px){main.dashboard-container{padding:1rem 0.5rem;}}
+    </style>
+</head>
+<body>
+    <main class="dashboard-container" role="main" aria-label="Prediction Dashboard">
+        <h1>Card Prediction!</h1>
+        {% if prediction %}
+        <section aria-live="polite">
+            <div class="result {% if prediction == 'Fraud' %}fraud{% else %}not-fraud{% endif %}" tabindex="0">
+                Prediction: {{ prediction }}
+            </div>
+        </section>
+        {% endif %}
+        {% if reasons %}
+        <section class="explanation" aria-label="Prediction Explanation">
+            <h3>Why this result?</h3>
+            <ul>
+                {% for reason in reasons %}
+                <li>{{ reason }}</li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+        <a href="{{ url_for('predict') }}" class="back-link">Try Another Prediction</a>
+    </main>
+    <script async defer>
+    // Lazy load background image
+    window.addEventListener('DOMContentLoaded',function(){
+        var img=new window.Image();
+        img.src='/static/card.png';
+        img.loading='lazy';
+        img.onload=function(){document.body.style.backgroundImage="url('/static/card.png')";};
+    });
+    </script>
+</body>
+</html>

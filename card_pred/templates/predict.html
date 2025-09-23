@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediction</title>
+    <style>
+        body{background:#fff url('/static/card.png') center/cover no-repeat fixed;margin:0;padding:0;font-family:Arial,sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;}
+        .container{background:rgba(255,255,255,0.85);border-radius:15px;box-shadow:0 4px 30px rgba(0,0,0,0.1);max-width:1100px;width:95vw;margin:40px auto;padding:40px 30px 20px 30px;text-align:center;}
+        form{display:flex;flex-direction:row;flex-wrap:wrap;align-items:flex-end;justify-content:center;gap:1.5rem;margin-bottom:1.5rem;}
+        .form-group{display:flex;flex-direction:column;min-width:150px;}
+        label{font-weight:500;margin-bottom:0.2rem;}
+        input[type="text"],input[type="number"]{padding:0.5rem;border:1px solid #ccc;border-radius:5px;margin-bottom:0.2rem;}
+        .button-row{width:100%;display:flex;justify-content:center;}
+        button{background:#007bff;color:#fff;border:none;padding:0.5rem 1.5rem;border-radius:5px;cursor:pointer;margin-top:0.5rem;display:inline-block;font-size:16px;transition:background 0.2s;}
+        button:disabled{background:#6c757d;cursor:not-allowed;}
+        button:hover:not(:disabled){background:#0056b3;}
+        a{display:block;margin-top:1rem;color:#007bff;text-decoration:none;}
+        .welcome{margin-bottom:1.5rem;color:#333;}
+        .card-img{width:80px;margin-bottom:1rem;}
+        .spinner{display:none;margin:0 auto 10px auto;border:4px solid #f3f3f3;border-top:4px solid #007bff;border-radius:50%;width:28px;height:28px;animation:spin 1s linear infinite;}
+        @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+        .error{color:#d9534f;margin-bottom:10px;}
+        .tooltip{border-bottom:1px dotted #007bff;cursor:help;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="{{ url_for('static', filename='download (2).jpeg') }}" alt="Card Prediction" class="card-img" loading="lazy">
+        <div class="welcome">
+            <h1>Card Prediction!</h1>
+        </div>
+        <h2>Prediction Interface</h2>
+        <form method="post" id="predictForm" autocomplete="on" onsubmit="return validatePredict(event)">
+            <div class="form-group">
+                <label for="distance_from_home">Distance from Home: <span class="tooltip" title="How far from home the transaction occurred (in km)">?</span></label>
+                <input type="number" step="any" id="distance_from_home" name="distance_from_home" required autocomplete="off" autofocus min="0" title="Enter a positive number">
+            </div>
+            <div class="form-group">
+                <label for="distance_from_last_transaction">Distance from Last Transaction: <span class="tooltip" title="Distance from the previous transaction (in km)">?</span></label>
+                <input type="number" step="any" id="distance_from_last_transaction" name="distance_from_last_transaction" required autocomplete="off" min="0" title="Enter a positive number">
+            </div>
+            <div class="form-group">
+                <label for="ratio_to_median_purchase_price">Ratio to Median Purchase Price: <span class="tooltip" title="Transaction amount divided by median purchase price">?</span></label>
+                <input type="number" step="any" id="ratio_to_median_purchase_price" name="ratio_to_median_purchase_price" required autocomplete="off" min="0" title="Enter a positive number">
+            </div>
+            <div class="form-group">
+                <label for="repeat_retailer">Repeat Retailer: <span class="tooltip" title="Is this a repeat retailer? (1 for yes, 0 for no)">?</span></label>
+                <input type="text" id="repeat_retailer" name="repeat_retailer" required autocomplete="off" pattern="[01]" title="Enter 1 for yes, 0 for no">
+            </div>
+            <div class="form-group">
+                <label for="used_chip">Used Chip: <span class="tooltip" title="Was a chip used? (1 for yes, 0 for no)">?</span></label>
+                <input type="text" id="used_chip" name="used_chip" required autocomplete="off" pattern="[01]" title="Enter 1 for yes, 0 for no">
+            </div>
+            <div class="form-group">
+                <label for="used_pin_number">Used Pin Number: <span class="tooltip" title="Was a PIN used? (1 for yes, 0 for no)">?</span></label>
+                <input type="text" id="used_pin_number" name="used_pin_number" required autocomplete="off" pattern="[01]" title="Enter 1 for yes, 0 for no">
+            </div>
+            <div class="button-row">
+                <button type="submit" id="predictBtn">Predict</button>
+            </div>
+        </form>
+        <div class="spinner" id="spinner"></div>
+        <div class="error" id="errorMsg" style="display:none;"></div>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+    <script async defer>
+    // Lazy load background image
+    window.addEventListener('DOMContentLoaded',function(){
+        var img=new window.Image();
+        img.src='/static/card.png';
+        img.loading='lazy';
+        img.onload=function(){document.body.style.backgroundImage="url('/static/card.png')";};
+    });
+    // Client-side validation and loading indicator
+    function validatePredict(e){
+        var form=document.getElementById('predictForm');
+        var errorMsg=document.getElementById('errorMsg');
+        errorMsg.style.display='none';
+        // Validate numbers
+        var numFields=['distance_from_home','distance_from_last_transaction','ratio_to_median_purchase_price'];
+        for(var i=0;i<numFields.length;i++){
+            var val=form[numFields[i]].value.trim();
+            if(val===''||isNaN(val)||Number(val)<0){
+                errorMsg.textContent='Please enter a valid positive number for '+numFields[i].replace(/_/g,' ');
+                errorMsg.style.display='block';
+                form[numFields[i]].focus();
+                return false;
+            }
+        }
+        // Validate 1/0 fields
+        var ynFields=['repeat_retailer','used_chip','used_pin_number'];
+        for(var j=0;j<ynFields.length;j++){
+            var v=form[ynFields[j]].value.trim();
+            if(v!=='1'&&v!=='0'){
+                errorMsg.textContent='Please enter 1 for yes or 0 for no for '+ynFields[j].replace(/_/g,' ');
+                errorMsg.style.display='block';
+                form[ynFields[j]].focus();
+                return false;
+            }
+        }
+        document.getElementById('predictBtn').disabled=true;
+        document.getElementById('spinner').style.display='block';
+        return true;
+    }
+    </script>
+</body>
+</html>

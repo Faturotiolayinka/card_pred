@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <style>
+    body{background:#fff url('/static/card.png') center/cover no-repeat fixed;margin:0;padding:0;font-family:Arial,sans-serif;}
+        .container{background:rgba(255,255,255,0.85);border-radius:15px;box-shadow:0 4px 30px rgba(0,0,0,0.1);max-width:350px;margin:80px auto;padding:30px 30px 20px 30px;text-align:center;}
+        h2{margin-bottom:25px;color:#2d2d2d;letter-spacing:1px;}
+        input[type="text"],input[type="password"]{width:90%;padding:10px;margin:10px 0 18px 0;border:1px solid #ccc;border-radius:8px;font-size:16px;}
+        button{width:100%;padding:10px;background:#007bff;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;transition:background 0.2s;}
+        button:disabled{background:#6c757d;cursor:not-allowed;}
+        button:hover:not(:disabled){background:#0056b3;}
+        .register-link{margin-top:18px;display:block;color:#007bff;text-decoration:none;font-size:15px;}
+        .register-link:hover{text-decoration:underline;}
+        .error{color:#d9534f;margin-bottom:10px;}
+        .spinner{display:none;margin:0 auto 10px auto;border:4px solid #f3f3f3;border-top:4px solid #007bff;border-radius:50%;width:28px;height:28px;animation:spin 1s linear infinite;}
+        @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+    </style>
+</head>
+<body>
+        <noscript><style>body{background-image:none!important;}</style><div style="color:red;text-align:center;">Please enable JavaScript for best experience.</div></noscript>
+        <div class="container">
+            <h2>Login</h2>
+            {% if error %}
+                <div class="error">{{ error }}</div>
+            {% endif %}
+            <form method="POST" id="loginForm" autocomplete="on" onsubmit="return validateLogin(event)">
+                <input type="text" name="username" placeholder="Username" required autocomplete="username" autofocus minlength="3" pattern="[A-Za-z0-9_]{3,}" title="At least 3 characters, letters, numbers, or underscores">
+                <input type="password" name="password" placeholder="Password" required autocomplete="current-password" minlength="4" title="At least 4 characters">
+                <div style="margin-bottom:12px;">
+                    <label for="captcha" style="font-size:14px;">What is <span id="captchaNum1"></span> + <span id="captchaNum2"></span>? <span style="color:red;">*</span></label>
+                    <input type="number" id="captcha" name="captcha" required placeholder="Answer" style="width:60px;" min="0" autocomplete="off">
+                </div>
+                <button type="submit" id="loginBtn">Login</button>
+            </form>
+            <div class="spinner" id="spinner"></div>
+            <a href="/register" class="register-link">Don't have an account? Register</a>
+        </div>
+        <script async defer>
+        // Lazy load background image
+        window.addEventListener('DOMContentLoaded',function(){
+            var img=new window.Image();
+            img.src='/static/card%20prediction2.jpeg';
+            img.loading='lazy';
+            img.onload=function(){document.body.style.backgroundImage="url('/static/card%20prediction2.jpeg')";};
+        });
+        // Simple CAPTCHA for brute-force protection
+        var captchaNum1, captchaNum2;
+        function generateCaptcha(){
+            captchaNum1=Math.floor(Math.random()*10+1);
+            captchaNum2=Math.floor(Math.random()*10+1);
+            document.getElementById('captchaNum1').textContent=captchaNum1;
+            document.getElementById('captchaNum2').textContent=captchaNum2;
+        }
+        window.addEventListener('DOMContentLoaded',generateCaptcha);
+        // Client-side validation and loading indicator
+        function validateLogin(e){
+            var form=document.getElementById('loginForm');
+            var username=form.username.value.trim();
+            var password=form.password.value.trim();
+            var captchaInput=form.captcha.value.trim();
+            var usernamePattern=/^[A-Za-z0-9_]{3,}$/;
+            if(!usernamePattern.test(username)){
+                alert('Username must be at least 3 characters (letters, numbers, or underscores).');
+                form.username.focus();
+                return false;
+            }
+            if(password.length<4){
+                alert('Password must be at least 4 characters.');
+                form.password.focus();
+                return false;
+            }
+            if(Number(captchaInput)!==(captchaNum1+captchaNum2)){
+                alert('Incorrect CAPTCHA answer. Please try again.');
+                form.captcha.value='';
+                form.captcha.focus();
+                generateCaptcha();
+                return false;
+            }
+            document.getElementById('loginBtn').disabled=true;
+            document.getElementById('spinner').style.display='block';
+            return true;
+        }
+        </script>
+</body>
+</html>
