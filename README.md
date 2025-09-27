@@ -63,3 +63,27 @@ The application addresses the problem of **credit card fraud detection**. By ana
 
 - Code hosted on GitHub.
 - Deployed on Render for public access.
+
+---
+
+- Here are the meanings of each prediction attribute:
+
+## Distance_from_home:
+- The distance (in meters or kilometers) between the cardholder’s registered home address and the location where the transaction occurred. Large values may indicate unusual activity.
+
+## Distance_from_last_transaction:
+- The distance between the location of the previous transaction and the current transaction. A big jump may suggest suspicious behavior.
+
+## Ratio_to_median_purchase_price:
+- The ratio of the current transaction amount to the cardholder’s typical (median) purchase price. High ratios may signal abnormal spending.
+
+## Repeat_retailer:
+- Indicates if the transaction is at a retailer where the cardholder has shopped before (1 for yes, 0 for no). New retailers may be riskier.
+
+## Used_chip:
+- Shows if the card’s chip was used for the transaction (1 for yes, 0 for no). Chip usage is generally more secure than magnetic stripe.
+
+## Used_pin_number:
+- Indicates if a PIN was entered during the transaction (1 for yes, 0 for no). PIN usage adds security.
+
+- These attributes help the model or rule-based system assess the likelihood of fraud for each transaction.
